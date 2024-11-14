@@ -39,4 +39,3 @@ def forbidden() -> str:
     """ GET /api/v1/forbidden
     Raise a 403 error """
     abort(403)
-
