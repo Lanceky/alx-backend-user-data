@@ -42,7 +42,6 @@ class Auth:
             normalized_excluded_path = excluded_path \
                 if excluded_path.endswith('/') else excluded_path + '/'
 
-            # Check if the normalized path starts with the normalized excluded_path
             if normalized_path.startswith(normalized_excluded_path):
                 return False
 
@@ -63,7 +62,6 @@ class Auth:
         if 'Authorization' not in request.headers:
             return None
         return request.headers.get('Authorization')
-
 
     def current_user(self, request=None) -> TypeVar('User'):
         """
