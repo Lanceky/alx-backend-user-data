@@ -1,76 +1,56 @@
 #!/usr/bin/env python3
 """
-This module provides the Auth class for managing API authentication.
+Auth class module for managing API authentication.
 """
 
 from flask import request
 from typing import List, TypeVar
+import re
 
 
 class Auth:
     """
     Auth class to manage API authentication.
-
-    Methods:
-        require_auth: Determines if a path requires authentication.
-        authorization_header: Retrieves the authorization header.
-        current_user: Retrieves the current user.
     """
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """
         Determines if a given path requires authentication.
-
-        Args:
-            path (str): The path to check.
-            excluded_paths (List[str]): A list of paths that do not require
-                authentication.
-
-        Returns:
-            bool: True if authentication is required, False otherwise.
+        Supports star (*) wildcard at the end of excluded paths.
         """
-        if path is None:
-            return True
-        if not excluded_paths:  # Checks if excluded_paths is None or empty
+        if path is None or not excluded_paths:
             return True
 
-        # Normalize the path by ensuring it always ends with a slash for consistency
-        normalized_path = path if path.endswith('/') else path + '/'
+        # Ensure path ends with '/' for consistency
+        path = path if path.endswith('/') else path + '/'
 
         for excluded_path in excluded_paths:
-            # Normalize the excluded_path as well
-            normalized_excluded_path = excluded_path \
-                if excluded_path.endswith('/') else excluded_path + '/'
+            # Remove trailing slash if exists (to handle star properly)
+            excluded_path = excluded_path.rstrip('/')
 
-            if normalized_path.startswith(normalized_excluded_path):
-                return False
+            # Check if the excluded path ends with a star
+            if excluded_path.endswith('*'):
+                pattern = excluded_path[:-1]
+                if path.startswith(pattern):
+                    return False
+            else:
+                # Add trailing slash for non-star paths
+                excluded_path = excluded_path + '/'
+                if path == excluded_path:
+                    return False
 
         return True
 
     def authorization_header(self, request=None) -> str:
         """
-        Retrieves the Authorization header from the Flask request object.
-
-        Args:
-            request: The Flask request object (optional).
-
-        Returns:
-            str: The Authorization header if present, None otherwise.
+        Retrieves the Authorization header from the request.
         """
         if request is None:
-            return None
-        if 'Authorization' not in request.headers:
             return None
         return request.headers.get('Authorization')
 
     def current_user(self, request=None) -> TypeVar('User'):
         """
-        Retrieves the current user associated with the Flask request.
-
-        Args:
-            request: The Flask request object (optional).
-
-        Returns:
-            TypeVar('User'): The current user, None if not available.
+        Retrieves the current user.
         """
         return None
