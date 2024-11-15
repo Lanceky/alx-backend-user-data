@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-""" Module of Users views
-"""
+""" Module of Users views """
 from api.v1.views import app_views
 from flask import abort, jsonify, request
 from models.user import User
@@ -17,10 +16,10 @@ def view_all_users() -> str:
 
 
 @app_views.route('/users/me', methods=['GET'], strict_slashes=False)
-def view_authenticated_user() -> str:
+def get_authenticated_user() -> str:
     """ GET /api/v1/users/me
     Return:
-      - JSON of the authenticated User
+      - Authenticated User object JSON represented
       - 404 if no authenticated user
     """
     if request.current_user is None:
@@ -40,11 +39,9 @@ def view_one_user(user_id: str = None) -> str:
     if user_id is None:
         abort(404)
 
-    # Check if user_id is "me"
+    # Check if user_id is "me" and redirect to get_authenticated_user function
     if user_id == "me":
-        if request.current_user is None:
-            abort(404)
-        return jsonify(request.current_user.to_json())
+        return get_authenticated_user()
 
     # Normal behavior for retrieving user by ID
     user = User.get(user_id)
@@ -59,7 +56,7 @@ def delete_user(user_id: str = None) -> str:
     Path parameter:
       - User ID
     Return:
-      - empty JSON is the User has been correctly deleted
+      - empty JSON if the User has been correctly deleted
       - 404 if the User ID doesn't exist
     """
     if user_id is None:
